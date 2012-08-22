@@ -1,5 +1,5 @@
 # From https://github.com/benhoskings/dot-files/ with personal modifications
-alias ga='git add -A'
+alias ga='git add'
 alias gap='ga -p'
 alias gau='git add -u'
 alias gbr='git branch -v'
