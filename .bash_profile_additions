@@ -1,0 +1,21 @@
+# Increase history to 10,000 entries... erase duplicates, and append on shell exit instead of overwrite.
+export HISTSIZE=10000
+export HISTCONTROL=erasedups
+export HISTFILESIZE=20000
+shopt -s histappend
+# Add startup script for python interpreter.
+PYTHONSTARTUP=~/.pythonrc.py
+export PYTHONSTARTUP
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+	. "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi

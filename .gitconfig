@@ -1,0 +1,28 @@
+
+[color]
+    ui = true
+
+[core]
+    excludesfile = ~/.gitignore_global
+    attributesfile = ~/.gitattributes
+
+[push]
+    default=nothing
+
+[merge]
+    tool = fugitive
+
+[mergetool "fugitive"]
+    cmd = vim -f -c \"Gdiff\" \"$MERGED\"
+
+[alias]
+    ci = commit
+    br = branch
+    co = checkout
+    st = status
+    cp = cherry-pick
+    diffc = diff --cached
+    plog = log --graph --all --decorate
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+    tr = for-each-ref --format='%(refname:short) <- %(upstream:short)' refs/heads
+    rb = rebase

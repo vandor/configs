@@ -1,0 +1,18 @@
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias lal='ls -lA'
+alias delpyc='find . -name \*.pyc | xargs rm'
+alias ugrep='grep -Irn --color=auto --exclude=*.svn*'
+alias tmuxes='tmux list-sessions'
+
+alias hstop='sudo /etc/init.d/httpd stop'
+alias hstart='sudo /etc/init.d/httpd start'
+alias hrestart='sudo /etc/init.d/httpd restart'
+alias mrestart='sudo /etc/init.d/mysqld restart'
+alias brestart='hrestart; mrestart'
+
+export EDITOR=vim
+
+source ~/.git_bash_prompt
+source ~/.git_aliases
