@@ -4,6 +4,8 @@ GREEN="\[\033[0;32m\]"
 LGRAY="\[\033[1;36m\]"
 DGRAY="\[\033[1;33m\]"
 NORMAL="\[\033[0;00m\]"
+# Bullets display differently on different systems. Here are a few to try: •●⚈
+BULLET="●"
 
 # If pwd is versioned with git, returns the current branch.
 function branch_git {
@@ -24,13 +26,13 @@ function modified_git {
         WORKG=$(echo "$STAT" | grep '^.\w' | wc -l)
         UNTRACKED=$(echo "$STAT" | grep '^??' | wc -l)
 
-        [ "$INDEX" -gt "0" ] && echo -en "\e[0;32m•"
-        [ "$WORKG" -gt "0" ] && echo -en "\e[0;31m•"
-        [ "$UNTRACKED" -gt "0" ] && echo -en "\e[0;0m•"
+        [ "$INDEX" -gt "0" ] && echo -en "\e[0;32m$BULLET"
+        [ "$WORKG" -gt "0" ] && echo -en "\e[0;31m$BULLET"
+        [ "$UNTRACKED" -gt "0" ] && echo -en "\e[0;0m$BULLET"
         ([ "$INDEX" -gt "0" ] || [ "$WORKG" -gt "0" ] || [ "$UNTRACKED" -gt "0" ]) && echo -n " "
 
         # [[ -n "$(git status --porcelain 2>/dev/null | \
-        #     grep -F 'M ' 2>/dev/null)" ]] && echo "• "
+        #     grep -F 'M ' 2>/dev/null)" ]] && echo "$BULLET "
     fi
 }
 export PS1="${DGRAY}\u${LGRAY}:\h ${BLUE}\w ${GREEN}\$(branch_git)\$(modified_git)${BWHITE}$ ${NORMAL}"
