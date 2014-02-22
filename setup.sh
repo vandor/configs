@@ -1,22 +1,40 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# Commence installation of config files
-ln -s $DIR/.bashrc_additions ~/.bash_aliases
-ln -s $DIR/.git_aliases ~/.git_aliases
-ln -s $DIR/solarized_dircolors.ansi-dark ~/.dircolors
-ln -s $DIR/.tmux.conf ~/.tmux.conf
-ln -s $DIR/.git_bash_prompt ~/.git_bash_prompt
-ln -s $DIR/.bash_profile_additions ~/.bash_profile_additions
+_linkfiles () {
+	# Get filenames
+	local_path="$DIR/$1"
+	echo $local_path
+	home_path="$HOME/${2:-$1}"
+	echo $home_path
+
+	# Backup existing file
+	if [ -e $home_path ]; then
+		bak_path=$home_path.bak
+		i=2
+		while [ -e $bak_path ]; do
+			bak_path=$home_path.bak$i
+			let i+=1
+		done
+		mv $home_path $bak_path
+	fi
+
+	# Create link
+	ln -s $local_path $home_path
+}
+
+## Commence installation of config files
+_linkfiles .bash_aliases
+_linkfiles .git_aliases
+_linkfiles .git_bash_prompt
+_linkfiles solarized_dircolors.ansi-dark .dircolors
+_linkfiles .tmux.conf
+
+cat $DIR/.bash_profile_additions >> $HOME/.bash_profile
+cat $DIR/.bashrc_additions >> $HOME/.bashrc
 
 # Set solarized colors for gnome-terminal
-source $DIR/solarize_terminal.sh
-
-# This would patch the ctrlp plugin in the VimConf
-# if [ -d "$HOME/VimConf/.vim/bundle/ctrlp" ]; then
-#     cd $HOME/VimConf/.vim/bundle/ctrlp
-#     patch -p0 < $DIR/ctrlp_remap.diff
-#     cd -
-# fi
+# source $DIR/solarize_gnome_terminal.sh
 
 unset DIR
+unset -f _linkfiles

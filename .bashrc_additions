@@ -1,18 +1,37 @@
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias lal='ls -lA'
-alias delpyc='find . -name \*.pyc | xargs rm'
-alias ugrep='grep -Irn --color=auto --exclude=*.svn*'
-alias tmuxes='tmux list-sessions'
+#!/bin/bash
 
-alias hstop='sudo /etc/init.d/httpd stop'
-alias hstart='sudo /etc/init.d/httpd start'
-alias hrestart='sudo /etc/init.d/httpd restart'
-alias mrestart='sudo /etc/init.d/mysqld restart'
-alias brestart='hrestart; mrestart'
+# TODO: Filter command history after written to file rather than using histignore.
+# Build HISTIGNORE from ~/.histignore file.
+# myhistignore=`sed '/#.*$/d;/^$/d' "$HOME/.histignore" | tr '\n' ':'`	# Read ~/.histignore, remove comments and blank lines, and replace newlines with colons.
+# export HISTIGNORE=`echo -e "${myhistignore%?}"`  # Trim final colon
+# export HISTIGNORE=$'[ \t]*:&:[fb]g:exit:ls:la:ll:lal:gs:gd:gdc:gc:gc!:gca:gcam:gcar:gcamr:gcmr:gbr:gau:gl:gla:gst:gstl:gsta:gstp:gstai:tig:vim:gshst:cd -:gf *' # Ignore the ls command and git aliases as well
+export HISTIGNORE=$'[ \t]*:&:[fb]g:exit'
+export HISTSIZE=100000
+export HISTFILESIZE=1000000
+export HISTCONTROL=$HISTCONTROL${HISTCONTROL+,}ignoredups:erasedups
+shopt -s histappend checkwinsize
+# Whenever displaying the prompt, write the previous line to disk
+export PROMPT_COMMAND="history -a"
 
 export EDITOR=vim
 
-source ~/.git_bash_prompt
-source ~/.git_aliases
+# Add startup script for python interpreter.
+PYTHONSTARTUP=~/.pythonrc.py
+export PYTHONSTARTUP
+
+# Use a different file for aliases
+if [ -f "${HOME}/.bash_aliases" ]; then
+	source "${HOME}/.bash_aliases"
+fi
+
+if [ -f "${HOME}/.git_bash_prompt" ] ; then
+	source ${HOME}/.git_bash_prompt
+fi
+
+if [ -f "${HOME}/.git_aliases" ] ; then
+	source ${HOME}/.git_aliases
+fi
+
+if [ -f "${HOME}/.git-completion.bash" ] ; then
+	source "${HOME}"/.git-completion.bash
+fi

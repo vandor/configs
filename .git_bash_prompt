@@ -1,3 +1,4 @@
+#!/bin/bash
 BLUE="\[\033[0;34m\]"
 BWHITE="\[\033[0;37m\]"
 GREEN="\[\033[0;32m\]"
@@ -9,10 +10,10 @@ BULLET="●"
 
 # If pwd is versioned with git, returns the current branch.
 function branch_git {
-    git branch &>/dev/null || return 1
-    HEAD="$(git symbolic-ref HEAD 2>/dev/null)"
-    BRANCH="${HEAD##*/} "
-    echo "${BRANCH:-unknown}"
+	git branch &>/dev/null || return 1
+	HEAD="$(git symbolic-ref HEAD 2>/dev/null)"
+	BRANCH="${HEAD##*/} "
+	echo "${BRANCH:-unknown}"
 }
 
 # If cwd is versioned with git, echoes colored bullets:
@@ -20,19 +21,19 @@ function branch_git {
 # Red if workspace is modified
 # Gray if untracked files exist
 function modified_git {
-    STAT=$(git status --porcelain 2>/dev/null)
-    if [[ -n "$STAT" ]]; then
-        INDEX=$(echo "$STAT" | grep '^\w' | wc -l)
-        WORKG=$(echo "$STAT" | grep '^.\w' | wc -l)
-        UNTRACKED=$(echo "$STAT" | grep '^??' | wc -l)
+	STAT=$(git status --porcelain 2>/dev/null)
+	if [[ -n "$STAT" ]]; then
+		INDEX=$(echo "$STAT" | grep '^\w' | wc -l)
+		WORKG=$(echo "$STAT" | grep '^.\w' | wc -l)
+		UNTRACKED=$(echo "$STAT" | grep '^??' | wc -l)
 
-        [ "$INDEX" -gt "0" ] && echo -en "\e[0;32m$BULLET"
-        [ "$WORKG" -gt "0" ] && echo -en "\e[0;31m$BULLET"
-        [ "$UNTRACKED" -gt "0" ] && echo -en "\e[0;0m$BULLET"
-        ([ "$INDEX" -gt "0" ] || [ "$WORKG" -gt "0" ] || [ "$UNTRACKED" -gt "0" ]) && echo -n " "
+		[ "$INDEX" -gt "0" ] && echo -en "\e[0;32m$BULLET"
+		[ "$WORKG" -gt "0" ] && echo -en "\e[0;31m$BULLET"
+		[ "$UNTRACKED" -gt "0" ] && echo -en "\e[0;0m$BULLET"
+		([ "$INDEX" -gt "0" ] || [ "$WORKG" -gt "0" ] || [ "$UNTRACKED" -gt "0" ]) && echo -n " "
 
-        # [[ -n "$(git status --porcelain 2>/dev/null | \
-        #     grep -F 'M ' 2>/dev/null)" ]] && echo "$BULLET "
-    fi
+		# [[ -n "$(git status --porcelain 2>/dev/null | \
+		#	  grep -F 'M ' 2>/dev/null)" ]] && echo "$BULLET "
+	fi
 }
-export PS1="${DGRAY}\u${LGRAY}:\h ${BLUE}\w ${GREEN}\$(branch_git)\$(modified_git)${BWHITE}$ ${NORMAL}"
+export PS1="\n${DGRAY}\u${LGRAY}:\h ${BLUE}\w ${GREEN}\$(branch_git)\$(modified_git)\n ${BWHITE}$ ${NORMAL}"

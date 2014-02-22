@@ -1,77 +1,228 @@
+#!/bin/bash
 # From https://github.com/benhoskings/dot-files/ with personal modifications
 alias ga='git add'
 alias gap='ga -p'
 alias gau='git add -u'
+alias gaA='git add -A'
+alias gae='git add -e'
 alias gbr='git branch -v'
-gc() {
-  git diff --cached | grep '\btap[ph]\b' >/dev/null &&
-    echo "\e[0;31;29mOops, there's a #tapp or similar in that diff.\e[0m" ||
-    git commit -v "$@"
-}
+# gc() {
+#	  git diff --cached | grep '\btap[ph]\b' >/dev/null &&
+#	  echo "\e[0;31;29mOops, there's a #tapp or similar in that diff.\e[0m" ||
+#	  git commit -v "$@"
+# }
+alias gc='git commit'
 alias gc!='git commit -v'
 alias gca='git commit -v -a'
-alias gcam='gc --amend'
-alias gch='git cherry-pick'
+alias gcA='git add -A; git commit -v'
 alias gcm='git commit -v --amend'
+gcmr() {
+	commit="${1:-HEAD}"
+	shift
+	git commit -v --amend --reset-author -c "$commit" "$@"
+}
+# alias gcam='gc --amend'
+alias gcam='git commit -v -a --amend'
+gcr() {
+	commit="${1:-HEAD}"
+	shift
+	git commit -v --reset-author -c "$commit" "$@"
+}
+gcar() {
+	commit="${1:-HEAD}"
+	shift
+	git commit -v -a --reset-author -c "$commit" "$@"
+}
+gcamr() {
+	commit="${1:-HEAD}"
+	shift
+	git commit -v -a --amend --reset-author -c "$commit" "$@"
+}
+alias gch='git cherry-pick'
 alias gco='git checkout'
 alias gcop='gco -p'
 alias gd='git diff -M'
+alias gdp='gd -p'
 alias gd.='git diff -M --color-words="."'
 gdbr() {
-  ref="$1"
-  shift
-  git diff -M "$@" $(git merge-base HEAD "$ref").."$ref"
+	ref="$1"
+	shift
+	git diff -M "$@" $(git merge-base HEAD "$ref").."$ref"
 }
 alias gdc='git diff --cached -M'
 alias gdc.='git diff --cached -M --color-words="."'
 alias gf='git fetch'
 git-new() {
-  [ -d "$1" ] || mkdir "$1" &&
-  cd "$1" &&
-  git init &&
-  touch .gitignore &&
-  git add .gitignore &&
-  git commit -m "Added .gitignore."
+	[ -d "$1" ] || mkdir "$1" &&
+	cd "$1" &&
+	git init &&
+	touch .gitignore &&
+	git add .gitignore &&
+	git commit -m "Added .gitignore."
 }
 git_current_branch() {
-  cat "$(git rev-parse --git-dir 2>/dev/null)/HEAD" | sed -e 's/^.*refs\/heads\///'
+	cat "$(git rev-parse --git-dir 2>/dev/null)/HEAD" | sed -e 's/^.*refs\/heads\///'
 }
 alias glog='git log --date-order --pretty="format:%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset"'
 alias gl='glog --graph'
-alias gla='gl --all'
-gls() {
-  query="$1"
-  shift
-  glog --pickaxe-regex "-S$query" "$@"
+glthis() {
+	branch="$(git_current_branch)"
+	gl origin/$branch...$branch
 }
-alias gm='git merge --no-ff'
+tlthis() {
+	branch="$(git_current_branch)"
+	tig origin/$branch...$branch
+}
+alias gla='gl --all --decorate'
+gls() {
+	query="$1"
+	shift
+	glog --pickaxe-regex "-S$query" "$@"
+}
+alias ggl='git log --graph --all --decorate'
+# alias gm='git merge --no-ff'
+alias gm='git merge'
 alias gmf='git merge --ff-only'
 alias gmfthis='gmf origin/$(git_current_branch)'
 alias gp='git push'
 alias gpthis='gp origin $(git_current_branch)'
+alias gpl='git pull'
+alias gplod='git pull origin develop'
+alias gplom='git pull origin master'
 alias gr='git reset'
 alias grb='git rebase -p'
-alias grbthis='grb origin/$(git_current_branch)'
+alias grbthis='grb --stat origin/$(git_current_branch)'
 alias grbc='git rebase --continue'
+alias grba='git rebase --abort'
 alias grbi='git rebase -i'
 alias grh='git reset --hard'
 alias grp='gr --patch'
 alias grsh='git reset --soft HEAD~'
 alias grv='git remote -v'
+alias gbl='git blame'
 #alias gs='git show'
 #alias gs.='git show --color-words="."'
-alias gst='git stash'
-alias gstp='git stash pop'
-alias gup='git smart-pull'
-gupstation() {
-  gup
-  gf production
-  gf staging
+# alias gst='git stash'
+alias gst='git stash save'
+# alias gstp='git stash pop'
+# alias gstpi='git stash pop --index'
+alias gstl='git stash list'
+# alias gsta='git stash apply'
+# alias gstai='git stash apply --index'
+# alias gstd='git stash drop'
+gst_base() {
+	fn="$1" && shift;
+	[ ! -z "${1##*[!0-9]*}" ] && i="$1" && shift || i=0
+	git stash $fn stash@{"$i"} "$@"
+}
+gsta() {
+	gst_base apply "$@"
+}
+# TODO: improve gstaf: git stash apply force
+# Could it work for the index, too?
+gstaf() {
+	[ ! -z "${1##*[!0-9]*}" ] && index="$1" && shift || index=0
+	git stash show -p stash@{"$index"} | git apply
+}
+gstai() {
+	gst_base "apply --index" "$@"
+}
+gstp() {
+	gst_base pop "$@"
+}
+gstpi() {
+	gst_base "pop --index" "$@"
+}
+# TODO: Keep dropped stash history
+gstd() {
+	gst_base drop "$@"
+}
+gsts() {
+	[ ! -z "${1##*[!0-9]*}" ] && index="$1" && shift || index=0
+	git show stash@{"$index"} "$@"
+}
+gstsi() { # show index of stash
+	[ ! -z "${1##*[!0-9]*}" ] && index="$1" && shift || index=0
+	git show stash@{"$index"}^2 "$@"
+}
+gstsu() { # show unversioned files of stash
+	[ ! -z "${1##*[!0-9]*}" ] && index="$1" && shift || index=0
+	git show stash@{"$index"}^3 "$@" 2> /dev/null || echo "No unversioned files in that stash"
+}
+gstu() {
+	git stash show -p stash@{"$1"} | git apply -R
+}
+
+alias gapp='git apply'
+gdapp() {
+	stash="$1" && shift
+	gdp $stash^..$stash | gapp "$@"
+}
+gsta-recov() {
+	if [ -z "$(git status --porcelain)" ]; then
+		[ -n "$1" ] && gdapp $1 && gd || echo "usage: gsta-recov <commit>"
+	else
+		echo "Dirty state detected; refusing to proceed."
+	fi
+}
+gstai-recov() {
+	if [ -z "$(git status --porcelain)" ]; then
+		[ -n "$1" ] && gdapp $1 && gdapp $1^2 --index --cached && gd && gdc || echo "usage: gstai-recov <commit>"
+	else
+		echo "Dirty state detected; refusing to proceed."
+	fi
 }
 
 # Customizations - Josh Loya
+alias gs='git status'
+alias ts='tig status'
 alias gcp='git cherry-pick'
 alias gfu='gf upstream'
+alias gfo='gf origin'
 alias gsh='git show'
+alias gshs='git show --stat'
 alias gsh.='git show --color-words="."'
-alias gs='git status'
+alias gshom='git show origin/master'
+alias gshod='git show origin/develop'
+alias tshom='tig show origin/master'
+alias tshod='tig show origin/develop'
+alias tsh='tig show'
+alias gpdthis='gfo && gst "Temp: pop after catching up this ref" && gmfthis && gstpi' # Git pull (dirty) - stash first. TODO: Smarten gfo step.
+
+alias gh='git help'
+alias gha='git help add'
+alias ghbr='git help branch'
+alias ghco='git help checkout'
+alias ghs='git help status'
+alias ghc='git help commit'
+alias ghp='git help push'
+alias ghpl='git help pull'
+alias ghf='git help fetch'
+alias ghd='git help diff'
+alias ghl='git help log'
+alias ghsh='git help show'
+alias ghm='git help merge'
+alias ghrb='git help rebase'
+alias ghst='git help stash'
+alias ghr='git help reset'
+alias ghcp='git help cherry-pick'
+alias ghbx='git help bisect'
+
+alias gbx='git bisect'
+alias gbxs='git bisect start'
+alias gbxg='git bisect good'
+alias gbxb='git bisect bad'
+alias gbxs='git bisect skip'
+alias gbxr='git bisect reset'
+alias gbxl='git bisect log'
+
+
+yesterworkday()
+{
+	[[ "1" == "$(date +%u)" ]] && echo "last friday" || echo "yesterday"
+}
+# alias glv='git log --since="$(yesterworkday)" --until=midnight --author="$(id -un)"' # git log verify
+glv() {
+	day="${1:-$(yesterworkday)}" && shift
+	git log --since="$day" --until="11:59pm $day" --author="$(id -un)" "$@"
+}
