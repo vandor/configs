@@ -32,3 +32,8 @@
 [tig]
 	ignore-case = true
 	show-id = true
+
+;[url "https://"]
+;    insteadOf = git://
+;[credential]
+;	helper = cache --timeout=3600
