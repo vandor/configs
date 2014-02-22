@@ -1,0 +1,90 @@
+# TODO: Implement this as a log-out history-cleanup script rather than HISTIGNORE preparation.
+#       I like all commands to be in history for the life of a terminal session, but lots of commands,
+#       like the ones listed in this file, are just noise in the history file.
+# The following patterns specify commands that bash history will ignore.
+# This file is parsed by .bash_aliases into the HISTIGNORE envvar.
+# Note: Lines beginning with '#' and blank lines are not parsed into HISTIGNORE.
+
+[ \t]*
+&
+[fb]g
+exit
+ls
+la
+ll
+lal
+tig
+vim
+cd -
+git help*
+git * --help
+git push *
+type -a *
+
+# Ignore git aliases
+# TODO: Automate this by extracting from ~/.git_aliases
+# WIP:
+# sed -r '/#.*$/d;/^$/d;s/^alias (.*)=.*/\1/' "$HOME/.git_aliases"
+# Needs to have non-greedy star────┘ |
+# Because the rhs may have an equals─┘ e.g. --pretty=true
+# Also needs to extract function names
+ga
+gap
+gau
+gae
+gbr*
+gc
+gc
+gc!
+gca
+gcm
+gcmr
+gcam
+gcr
+gcar
+gcamr
+gch
+gco*
+gcop
+gd*
+gd.*
+gdbr
+gdc
+gdc.
+gf*
+git-new
+git_current_branch
+glog
+gl*
+gla
+gls
+ggl
+gm*
+gmf*
+gmfthis
+gp*
+gpthis
+gr*
+grb*
+grbthis
+grbc
+grbi
+grh*
+grp
+grsh
+grv*
+gst*
+gstp
+gstpi
+gstl
+gsta
+gstai
+gstd
+gup
+gupstation
+gcp*
+gfu
+gsh*
+gshs*
+gsh.*
+gs
