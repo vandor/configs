@@ -1,5 +1,6 @@
 #!/bin/bash
-alias ls="ls -h --color"
+alias ls="ls -hG"
+#alias ls="ls -h --color
 alias ll='ls -alF'
 #alias ll='ls -al'
 alias la='ls -A'

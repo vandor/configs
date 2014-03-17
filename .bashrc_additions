@@ -14,6 +14,9 @@ shopt -s histappend checkwinsize
 export PROMPT_COMMAND="history -a"
 
 export EDITOR=vim
+# For mac
+export CLICOLOR=1
+export LSCOLORS=gxfxbEaEBxxEhEhBaDaCaD
 
 # Add startup script for python interpreter.
 PYTHONSTARTUP=~/.pythonrc.py
