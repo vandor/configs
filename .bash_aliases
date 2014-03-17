@@ -25,3 +25,10 @@ alias hstart='sudo /etc/init.d/httpd start'
 alias hrestart='sudo /etc/init.d/httpd restart'
 alias mrestart='sudo /etc/init.d/mysqld restart'
 alias brestart='hrestart; mrestart'
+
+
+# Tag searches
+alias tags="grep -ohr \"#[^ ]*\" . | sort | uniq | tr -d '#' | tr '\n' ' '"
+function tag () {
+	grep -irl \#${1} . | xargs head -${2:-2}
+}
