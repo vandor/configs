@@ -37,3 +37,6 @@
 ;    insteadOf = git://
 ;[credential]
 ;	helper = cache --timeout=3600
+[user]
+	name = Josh Loya
+	email = vandor@users.noreply.github.com
