@@ -1,11 +1,8 @@
 #!/bin/bash
-alias ls="ls -hG"
-#alias ls="ls -h --color
+alias ls='ls -h --color'
 alias ll='ls -al'
-#alias ll='ls -al'
 alias la='ls -A'
 alias l='ls -C'
-#alias l='ls -C'
 alias lla='ls -lA'
 alias grep='grep --color'
 alias less='less -i'
