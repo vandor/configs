@@ -29,6 +29,11 @@ alias brestart='hrestart; mrestart'
 
 # Tag searches
 alias tags="grep -ohr \"#[^ ]*\" . | sort | uniq | tr -d '#' | tr '\n' ' '"
+function tagf () {
+	grep -irl \#${1} .
+}
 function tag () {
-	grep -irl \#${1} . | xargs head -${2:-2}
+	tagfiles=$(tagf ${1})
+	[ $(echo "$tagfiles" | wc -l) -eq 1 ] && echo "==> $tagfiles <=="
+	echo "$tagfiles" | xargs head -${2:-2}
 }
