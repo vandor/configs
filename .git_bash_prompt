@@ -27,9 +27,9 @@ function modified_git {
 		WORKG=$(echo "$STAT" | grep '^.\w' | wc -l)
 		UNTRACKED=$(echo "$STAT" | grep '^??' | wc -l)
 
-		[ "$INDEX" -gt "0" ] && echo -en "\e[0;32m$BULLET"
-		[ "$WORKG" -gt "0" ] && echo -en "\e[0;31m$BULLET"
-		[ "$UNTRACKED" -gt "0" ] && echo -en "\e[0;0m$BULLET"
+		[ "$INDEX" -gt "0" ] && echo -en "\033[0;32m$BULLET"
+		[ "$WORKG" -gt "0" ] && echo -en "\033[0;31m$BULLET"
+		[ "$UNTRACKED" -gt "0" ] && echo -en "\033[0;0m$BULLET"
 		([ "$INDEX" -gt "0" ] || [ "$WORKG" -gt "0" ] || [ "$UNTRACKED" -gt "0" ]) && echo -n " "
 
 		# [[ -n "$(git status --porcelain 2>/dev/null | \
