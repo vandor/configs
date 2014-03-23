@@ -6,7 +6,7 @@ LGRAY="\[\033[1;36m\]"
 DGRAY="\[\033[1;33m\]"
 NORMAL="\[\033[0;00m\]"
 # Bullets display differently on different systems. Here are a few to try: •●⚈
-BULLET="●"
+BULLET="⚈"
 
 # If pwd is versioned with git, returns the current branch.
 function branch_git {
