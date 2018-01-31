@@ -1,47 +1,85 @@
 #!/bin/bash
 # From https://github.com/benhoskings/dot-files/ with personal modifications
+
+git_current_branch() {
+	cat "$(git rev-parse --git-dir 2>/dev/null)/HEAD" | sed -e 's/^.*refs\/heads\///'
+}
+
+
+alias gbr='git branch -v'
+alias gnr='git branch -v' #keynoard issue
+
+
+# Status
+alias gs='git status'
+alias gss='gs --short'
+alias gsss="gss | grep '^[^ ?]'"  #staged
+alias gssuu="gss | grep '^.[^ ]'"  #unstaged & untracked
+alias gssu="gss | grep '^.[^ ?]'"  #unstaged
+alias gsp='gs --porcelain'
+alias ts='tig status'
+
+
+# Add
 alias ga='git add'
 alias gap='ga -p'
-alias gau='git add -u'
-alias gaA='git add -A'
+alias gau='git add -u; gs'
+alias gaA='git add -A; gs'
 alias gae='git add -e'
-alias gbr='git branch -v'
-# gc() {
-#	  git diff --cached | grep '\btap[ph]\b' >/dev/null &&
-#	  echo "\e[0;31;29mOops, there's a #tapp or similar in that diff.\e[0m" ||
-#	  git commit -v "$@"
-# }
+
+
+# Reset
+alias gr='git reset'
+alias grh='git reset --hard'
+alias grp='gr --patch'
+alias grsh='git reset --soft HEAD~'
+
+
+# Checkout
+alias gco='git checkout'
+alias gco-='gco -'
+alias gcop='gco -p'
+
+
+# Commit
 alias gc='git commit'
 alias gc!='git commit -v'
 alias gca='git commit -v -a'
 alias gcA='git add -A; git commit -v'
+alias gch='gc -C HEAD'
 alias gcm='git commit -v --amend'
+alias gcmh='gcm -C HEAD'
 gcmr() {
 	commit="${1:-HEAD}"
 	shift
 	git commit -v --amend --reset-author -c "$commit" "$@"
 }
-# alias gcam='gc --amend'
-alias gcam='git commit -v -a --amend'
+alias gcam='gca --amend'
+alias gcamh='gcam -C HEAD'
 gcr() {
 	commit="${1:-HEAD}"
 	shift
-	git commit -v --reset-author -c "$commit" "$@"
+	gc! --reset-author -c "$commit" "$@"
 }
 gcar() {
 	commit="${1:-HEAD}"
 	shift
-	git commit -v -a --reset-author -c "$commit" "$@"
+	gca --reset-author -c "$commit" "$@"
 }
 gcamr() {
 	commit="${1:-HEAD}"
 	shift
-	git commit -v -a --amend --reset-author -c "$commit" "$@"
+	gcam --reset-author -c "$commit" "$@"
 }
-alias gch='git cherry-pick'
-alias gco='git checkout'
-alias gcop='gco -p'
+
+
+# Diff
 alias gd='git diff -M'
+alias gdw='git diff -w'
+gdthis() {
+	branch="$(git_current_branch)"
+	gd "origin/$branch"..."$branch"
+}
 alias gdp='gd -p'
 alias gd.='git diff -M --color-words="."'
 gdbr() {
@@ -50,21 +88,27 @@ gdbr() {
 	git diff -M "$@" $(git merge-base HEAD "$ref").."$ref"
 }
 alias gdc='git diff --cached -M'
-alias gdc.='git diff --cached -M --color-words="."'
+alias gdc.='gdc --color-words="."'
+alias gds='git diff --staged -M'
+alias gds.='gds --color-words="."'
+
+
 alias gf='git fetch'
-git-new() {
-	[ -d "$1" ] || mkdir "$1" &&
-	cd "$1" &&
-	git init &&
-	touch .gitignore &&
-	git add .gitignore &&
-	git commit -m "Added .gitignore."
+alias gfu='gf upstream'
+alias gfo='gf origin'
+gmfb() {
+	branch="$1" && shift
+	gf . origin/$branch:$branch "$@"
 }
-git_current_branch() {
-	cat "$(git rev-parse --git-dir 2>/dev/null)/HEAD" | sed -e 's/^.*refs\/heads\///'
-}
+alias gf.='gmfb'
+
+
+# Logs
 alias glog='git log --date-order --pretty="format:%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset"'
-alias gl='glog --graph'
+alias gl='glog --graph --decorate'
+glo() {
+	gl origin/$@
+}
 glthis() {
 	branch="$(git_current_branch)"
 	gl origin/$branch...$branch
@@ -73,47 +117,154 @@ tlthis() {
 	branch="$(git_current_branch)"
 	tig origin/$branch...$branch
 }
-alias gla='gl --all --decorate'
+alias ggl='git log --graph --all --decorate'
+alias gla='gl --all'
+alias tla='tig --all'
+glg() {
+	greps=()
+	for query in "$@"; do
+		greps+=(--grep="$query")
+	done
+	glog -i "${greps[@]}"
+}
 gls() {
 	query="$1"
 	shift
 	glog --pickaxe-regex "-S$query" "$@"
 }
-alias ggl='git log --graph --all --decorate'
-# alias gm='git merge --no-ff'
+glsthis() {
+	query="$1"
+	shift
+	branch="$(git_current_branch)"
+	glog --pickaxe-regex "-S$query" origin/$branch...$branch "$@"
+}
+
+
+# Pain in the dots
+glm() {
+	gl master..$@
+}
+glmo() {
+	gl master..origin/$@
+}
+gdmo() {
+	gd master...origin/$@
+}
+#OPOS
+glmoo() {
+	glmo opos-$@
+}
+glmoO() {
+	glmo OPOS-$@
+}
+gdmoo() {
+	gdmo opos-$@
+}
+gdmoO() {
+	gdmo OPOS-$@
+}
+
+
+# Merge
 alias gm='git merge'
 alias gmf='git merge --ff-only'
 alias gmfthis='gmf origin/$(git_current_branch)'
+
+
+# Push
 alias gp='git push'
+alias gpo='git push origin'
 alias gpthis='gp origin $(git_current_branch)'
-alias gpl='git pull'
-alias gplod='git pull origin develop'
-alias gplom='git pull origin master'
-alias gr='git reset'
+alias gpthisj='gpthis && gj'
+export jenkinsNotifyUrl='http://ci1.oreillyauto.com/Jenkins/git/notifyCommit'
+alias gj='curl "$jenkinsNotifyUrl?url=$(git config --get remote.origin.url)&branches=$(git_current_branch)"'
+
+
+# Show
+alias gsh='git show'
+gshthis() {
+	branch="$(git_current_branch)"
+	gsh "origin/$branch"
+}
+alias gshs='git show --stat'
+alias gsh.='git show --color-words="."'
+alias gshw='git show -w'
+gsho() {
+	git show origin/$@
+}
+alias gshom='git show origin/master'
+alias gshod='git show origin/develop'
+alias tshom='tig show origin/master'
+alias tshod='tig show origin/develop'
+alias tsh='tig show'
+for i in {1..5}; do
+	alias gsh$i="gsh HEAD~$i"
+	alias gshs$i="gshs HEAD~$i"
+done
+
+
+# Rebase
 alias grb='git rebase -p'
 alias grbthis='grb --stat origin/$(git_current_branch)'
 alias grbc='git rebase --continue'
 alias grba='git rebase --abort'
 alias grbi='git rebase -i'
-alias grh='git reset --hard'
-alias grp='gr --patch'
-alias grsh='git reset --soft HEAD~'
-alias grv='git remote -v'
-alias gbl='git blame'
-#alias gs='git show'
-#alias gs.='git show --color-words="."'
-# alias gst='git stash'
+for i in {1..5}; do
+	alias grbi$i="grbi HEAD~$i"
+done
+
+alias grbo='git rebase --onto'
+alias grboom='grbo origin/master'
+grblocthis() {
+	curbranch="$(git_current_branch)"
+	locbranch="${1:-local}"
+	gco "$locbranch"
+	grb "$curbranch"
+	gco -
+	gmf "$locbranch"
+}
+alias grbloc='grb --onto local'
+
+
+# Cherry-pick
+alias gcp='git cherry-pick'
+alias gcpc='gcp --continue'
+alias gcpa='gcp --abort'
+alias gch='git cherry'
+alias gchm='git cherry master'
+gchmo() {
+	git cherry master origin/$@
+}
+gchmoo() {
+	gchmo opos-$@
+}
+gchmoO() {
+	gchmo OPOS-$@
+}
+cherry_merged() {
+	if [ -z "$(git cherry origin/master origin/$1 | grep -v -)" ]; then
+		echo $1
+	fi
+}
+not_cherry_merged() {
+	if [ -n "$(git cherry origin/master origin/$1 | grep -v -)" ]; then
+		echo "$1 has unpicked commits"
+		git cherry origin/master origin/$1
+		echo ""
+		GIT_PAGER='' gl origin/master..origin/$1
+		echo -e "\n"
+	fi
+}
+
+
+# Stash
 alias gst='git stash save'
-# alias gstp='git stash pop'
-# alias gstpi='git stash pop --index'
+alias gstu='git stash save -u'
 alias gstl='git stash list'
-# alias gsta='git stash apply'
-# alias gstai='git stash apply --index'
-# alias gstd='git stash drop'
 gst_base() {
-	fn="$1" && shift;
-	[ ! -z "${1##*[!0-9]*}" ] && i="$1" && shift || i=0
-	git stash $fn stash@{"$i"} "$@"
+	fn="$1" && shift;  #Get command
+	[ ! -z "${1##*[!0-9]*}" ] && i="$1" && shift || i=0  #Get stash index or 0
+	git stash $fn stash@{"$i"} "$@"  #Run unquoted command at index
 }
 gsta() {
 	gst_base apply "$@"
@@ -149,46 +300,46 @@ gstsu() { # show unversioned files of stash
 	[ ! -z "${1##*[!0-9]*}" ] && index="$1" && shift || index=0
 	git show stash@{"$index"}^3 "$@" 2> /dev/null || echo "No unversioned files in that stash"
 }
-gstu() {
+gstz() { # undo
 	git stash show -p stash@{"$1"} | git apply -R
 }
 
+
+# Pull
+alias gpl='git pull'
+alias gplod='git pull origin develop'
+alias gplom='git pull origin master'
+alias gpdthis='gfo && gst "Temp: pop after catching up this ref" && gmfthis && gstpi' # Git pull (dirty) - stash first. TODO: Smarten gfo step.
+
+
+# Blame
+alias gbl='git blame'
+alias tbl='tig blame'
+
+
+# Apply
 alias gapp='git apply'
 gdapp() {
 	stash="$1" && shift
 	gdp $stash^..$stash | gapp "$@"
 }
-gsta-recov() {
-	if [ -z "$(git status --porcelain)" ]; then
-		[ -n "$1" ] && gdapp $1 && gd || echo "usage: gsta-recov <commit>"
+gsta_recov() {
+	if [ -z "$(gsp)" ]; then
+		[ -n "$1" ] && gdapp $1 && gd || echo "usage: gsta_recov <commit>"
 	else
 		echo "Dirty state detected; refusing to proceed."
 	fi
 }
-gstai-recov() {
-	if [ -z "$(git status --porcelain)" ]; then
+gstai_recov() {
+	if [ -z "$(gsp)" ]; then
 		[ -n "$1" ] && gdapp $1 && gdapp $1^2 --index --cached && gd && gdc || echo "usage: gstai-recov <commit>"
 	else
 		echo "Dirty state detected; refusing to proceed."
 	fi
 }
 
-# Customizations - Josh Loya
-alias gs='git status'
-alias ts='tig status'
-alias gcp='git cherry-pick'
-alias gfu='gf upstream'
-alias gfo='gf origin'
-alias gsh='git show'
-alias gshs='git show --stat'
-alias gsh.='git show --color-words="."'
-alias gshom='git show origin/master'
-alias gshod='git show origin/develop'
-alias tshom='tig show origin/master'
-alias tshod='tig show origin/develop'
-alias tsh='tig show'
-alias gpdthis='gfo && gst "Temp: pop after catching up this ref" && gmfthis && gstpi' # Git pull (dirty) - stash first. TODO: Smarten gfo step.
 
+# Help
 alias gh='git help'
 alias gha='git help add'
 alias ghbr='git help branch'
@@ -206,8 +357,11 @@ alias ghrb='git help rebase'
 alias ghst='git help stash'
 alias ghr='git help reset'
 alias ghcp='git help cherry-pick'
+alias ghch='git help cherry'
 alias ghbx='git help bisect'
 
+
+# Bisect
 alias gbx='git bisect'
 alias gbxs='git bisect start'
 alias gbxg='git bisect good'
@@ -217,12 +371,163 @@ alias gbxr='git bisect reset'
 alias gbxl='git bisect log'
 
 
+# Remove
+alias grm='git rm'
+
+
+# Remote
+alias grv='git remote -v'
+alias gra='git remote add'
+
+
+
+# quick add/reset/checkout/diff
+_filenameRow() {
+	row $1 | cut -c4- | sed -r 's/^.*-> //'
+}
+
+row() {
+	rownum="$1"
+	sign=${rownum:0:1}
+	if [[ "$sign" == "-" ]]; then
+		tail -n ${rownum:1} | head -n1
+	else
+		sed -n ${rownum}p
+	fi
+}
+gan() {
+	local n=$1 && shift;
+	filepath="$(gssuu | _filenameRow $n)"
+	echo " > Adding $filepath"
+	echo ""
+	ga "$filepath" "$@"
+	gs
+	echo " > Added $filepath"
+}
+grn() {
+	local n=$1 && shift;
+	filepath="$(gsss | _filenameRow $n)"
+	echo " > Resetting $filepath"
+	echo ""
+	gr "$filepath" "$@"
+	gs
+	echo " > Reset $filepath"
+}
+gcon() {
+	local n=$1 && shift;
+	filepath="$(gssu | _filenameRow $n)"
+	echo " > Checking out $filepath"
+	echo ""
+	gco "$filepath" "$@"
+	gs
+	echo " > Checked out $filepath"
+}
+gdn() {
+	local n=$1 && shift;
+	filepath="$(gssu | _filenameRow $n)"
+	echo " > diffing $filepath"
+	gd "$filepath" "$@"
+}
+gdcn() {
+	local n=$1 && shift;
+	filepath="$(gsss | _filenameRow $n)"
+	echo " > diffing staged $filepath"
+	gdc "$filepath" "$@"
+}
+for i in {-5..-1} {1..5}; do
+	alias ga$i="gan $i"
+	alias gap$i="ga$i -p"
+	alias gr$i="grn $i"
+	alias grp$i="gr$i -p"
+	alias gco$i="gcon $i"
+	alias gcop$i="gco$i -p"
+	alias gd$i="gdn $i"
+	alias gdc$i="gdcn $i"
+	alias gds$i="gdcn $i"
+done
+
+
+
+#Initialize repos
+gocl() {
+	local repo="$1" && shift
+	git clone git@scm2.oreillyauto.com:${repo}.git "$@"
+	pushd $repo &>/dev/null
+	git remote set-url --push origin git@scm.oreillyauto.com:${repo}.git
+	popd &>/dev/null
+}
+grao() {
+	local repo="$1"
+	gra origin git@scm2.oreillyauto.com:${repo}.git
+	git remote set-url --push origin git@scm.oreillyauto.com:${repo}.git
+}
+git_new() {
+	[ -d "$1" ] || mkdir "$1" &&
+	pushd "$1" >/dev/null &&
+	git init &&
+	touch .gitignore &&
+	git add .gitignore &&
+	git commit -m "Initial commit"
+}
+gio() { #new idf requests
+	git_new "$1"
+	grao "$1"
+	gpthis
+	popd >/dev/null
+}
+
+
+#Setup trainees
+grat() {
+	gra $1 git@scm.oreillyauto.com:${PWD##*/}-${1}.git
+}
+traineemaster() {
+	local uid="$1"
+	local length=2
+	local branch="${uid:0:length}m"
+	while `git branch | grep -q "^.\s${branch}$"`; do
+		((length++))
+		# This duplication is ugly, so clean it up... later :)
+		branch="${uid:0:length}m"
+	done
+	echo $branch
+}
+traineem() {
+	local uid=$1
+	local length=${2:-2}
+	echo $length
+	local branch="${uid:0:length}m"
+	if `git branch | grep -q "^.\s${branch}$"`; then
+		echo $branch
+	else
+		traineem $uid $((++length))
+	fi
+}
+gbrat() {  # mnemonic: "git branch add trainee"
+	local uid="$1"
+	local traineeBranch=`traineemaster "$uid"`
+	grat $uid
+	gf $uid
+	gco -b $traineeBranch $uid/master
+}
+grit() {  # mnemonic: "git remote initialize trainee"
+	local uid="$1"
+	local traineeBranch=`traineemaster "$uid"`
+	grat $uid
+	gco -b $traineeBranch master
+	gp -u $uid $traineeBranch:master
+}
+
+
+#Verify recent commits
 yesterworkday()
 {
 	[[ "1" == "$(date +%u)" ]] && echo "last friday" || echo "yesterday"
 }
-# alias glv='git log --since="$(yesterworkday)" --until=midnight --author="$(id -un)"' # git log verify
-glv() {
+glv() {  # mnemonic: verify
 	day="${1:-$(yesterworkday)}" && shift
 	git log --since="$day" --until="11:59pm $day" --author="$(id -un)" "$@"
 }
+
+#Ignore local changes
+alias guiau='git update-index --assume-unchanged'
