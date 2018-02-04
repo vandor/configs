@@ -7,13 +7,27 @@ alias lla='ls -lA'
 alias grep='grep --color'
 alias less='less -i'
 
+export EDITOR='vim'
 alias ta='type -a'
+alias dush='du -sh'
 alias delpyc='find . -name \*.pyc | xargs rm'
 alias ugrep='grep -Irn --color=auto --exclude=*.svn* --exclude-dir=CVS' 
 alias tmuxes='tmux list-sessions'
+alias cd-="cd -"
+alias h='heroku'
+alias hps='h ps'
 
+treel() {
+	treedir=${1:-.}
+	tree "$treedir" | less
+}
 prettyjson() {
 	echo "$1" | python -mjson.tool
+}
+
+vimf() {
+	searchDir="${2:-.}"
+	find "$searchDir" -iname "$1" -exec vim -p {} +
 }
 
 # Apache shortcuts
